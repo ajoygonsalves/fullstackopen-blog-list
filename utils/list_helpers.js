@@ -73,9 +73,13 @@ const totalLikes = (blogs) => {
 
 const mostLiked = (blogs) => {
   if (blogs.length < 1) return 0;
-  return blogs.reduce((acc, curr) => {
+
+  const mostLikedItem = blogs.reduce((acc, curr) => {
+    if (acc.likes === curr.likes) return { ...acc };
     return acc.likes > curr.likes ? { ...acc } : { ...curr };
-  }, blogs[0]);
+  });
+
+  return mostLikedItem;
 };
 
 const blogs1 = [
@@ -125,6 +129,14 @@ const blogs1 = [
     author: "Robert C. Martin",
     url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
     likes: 2,
+    __v: 0,
+  },
+  {
+    _id: "5a422bc61b54a676234d17fc",
+    title: "Type wars",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
+    likes: 12,
     __v: 0,
   },
 ];
