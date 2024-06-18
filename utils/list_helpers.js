@@ -74,7 +74,10 @@ const mostBlogs = (blogs) => {
     .value(); // Get the final result
 };
 
-console.log(mostBlogs(blogs));
+const mostLikes = (blogs) => {
+  if (blogs.length < 1) return 0;
+  return _.chain(blogs).maxBy("likes").pick(["author", "likes"]).value();
+};
 
 const totalLikes = (blogs) => {
   if (blogs.length < 1) return 0;
@@ -99,6 +102,7 @@ module.exports = {
   totalLikes,
   mostLiked,
   mostBlogs,
+  mostLikes,
 };
 
 // Define a new totalLikes function that receives a list of blog posts as a parameter. The function returns the total sum of likes in all of the blog posts.
