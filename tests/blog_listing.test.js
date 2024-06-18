@@ -165,10 +165,24 @@ describe.only("REST API tests", () => {
       .expect("Content-Type", /application\/json/);
 
     const updatedBlog = await api.get("/api/blogs");
-    console.log({ UPDTED: updatedBlog.body.length });
 
     assert(result.body.message === "Created listing successful");
     assert(updatedBlog.body.length > blogs.length);
+  });
+
+  test.only("If the likes property is missing from the request, it will default to the value 0", async () => {
+    const result = await api
+      .post("/api/blogs")
+      .send({
+        title: "As it was, they said, it was not the same.",
+        author: "Tyga Milauew",
+        url: "http://bundlewarriors.com",
+      })
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    assert(result.body.blog.likes === 0);
+    // assert(updatedBlog.body.length > blogs.length);
   });
 });
 
