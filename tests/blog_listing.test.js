@@ -1,6 +1,148 @@
-const { test, describe } = require("node:test");
+const {
+  describe,
+  test,
+  before,
+  beforeEach,
+  after,
+  afterEach,
+} = require("node:test");
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helpers");
+const app = require("../app");
+const { MongoMemoryServer } = require("mongodb-memory-server");
+const supertest = require("supertest");
+const mongoose = require("mongoose");
+const Blog = require("../models/blog");
+const _ = require("lodash");
+
+const api = supertest(app);
+
+let mongoServer;
+
+const blogs = [
+  {
+    _id: "5a422a851b54a676234d17f7",
+    title: "React patterns",
+    author: "Michael Chan",
+    url: "https://reactpatterns.com/",
+    likes: 7,
+    __v: 0,
+  },
+  {
+    _id: "5a422aa71b54a676234d17f8",
+    title: "Go To Statement Considered Harmful",
+    author: "Edsger W. Dijkstra",
+    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
+    likes: 5,
+    __v: 0,
+  },
+  {
+    _id: "5a422b3a1b54a676234d17f9",
+    title: "Canonical string reduction",
+    author: "Edsger W. Dijkstra",
+    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+    likes: 12,
+    __v: 0,
+  },
+  {
+    _id: "5a422b891b54a676234d17fa",
+    title: "First class tests",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+    likes: 10,
+    __v: 0,
+  },
+  {
+    _id: "5a422ba71b54a676234d17fb",
+    title: "TDD harms architecture",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
+    likes: 0,
+    __v: 0,
+  },
+  {
+    _id: "5a422bc61b54a676234d17fc",
+    title: "Type wars",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
+    likes: 2,
+    __v: 0,
+  },
+];
+
+before(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+
+  if (mongoose.connection.readyState === 0) {
+    // Connect to the in-memory MongoDB server
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
+});
+
+beforeEach(async () => {
+  await Blog.deleteMany({});
+
+  const blogObjects = blogs.map((blog) => {
+    return new Blog(blog);
+  });
+
+  const promiseBlogObjects = blogObjects.map((blogObject) => {
+    return blogObject.save();
+  });
+
+  await Promise.all(promiseBlogObjects);
+});
+
+after(async () => {
+  if (mongoServer) {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  }
+});
+
+afterEach(async () => {
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    const collection = collections[key];
+    await collection.deleteMany({});
+  }
+});
+
+describe.only("REST API tests", () => {
+  test.only("Blogs are returned as json", async () => {
+    const result = await api
+      .get("/api/blogs")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const expectedResult = blogs.map((blog) => {
+      blog["id"] = blog._id;
+
+      return _.pick(blog, ["title", "author", "url", "likes", "id"]);
+    });
+
+    console.log(expectedResult);
+
+    assert.deepStrictEqual(
+      _.sortBy(result.body, ["id"]),
+      _.sortBy(expectedResult, ["id"])
+    );
+  });
+
+  // test("Blogs use id instead of _id", async () => {
+  //   const result = await api
+  //     .get("/api/blogs")
+  //     .expect(200)
+  //     .expect("Content-Type", /application\/json/);
+
+  //   assert.strict(result, blogs);
+  // });
+});
 
 test("dummy returns one", () => {
   const blogs = [];

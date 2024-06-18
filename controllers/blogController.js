@@ -5,7 +5,6 @@ const getAll = async (req, res) => {
   try {
     const all = await Blog.find({});
     res.status(200).json(all);
-    logger.info({ all: all });
   } catch (error) {
     logger.error("Error fetching blogs: ", error);
     res.status(500).json({ error: "Failed to fetch blogs" });
