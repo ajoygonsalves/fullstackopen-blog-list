@@ -114,7 +114,7 @@ afterEach(async () => {
 });
 
 describe.only("REST API tests", () => {
-  test.only("Blogs are returned as json", async () => {
+  test.only("Blogs use id instead of _id", async () => {
     const result = await api
       .get("/api/blogs")
       .expect(200)
@@ -134,14 +134,42 @@ describe.only("REST API tests", () => {
     );
   });
 
-  // test("Blogs use id instead of _id", async () => {
-  //   const result = await api
-  //     .get("/api/blogs")
-  //     .expect(200)
-  //     .expect("Content-Type", /application\/json/);
+  test.only("Blogs are returned as json", async () => {
+    const result = await api
+      .get("/api/blogs")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
 
-  //   assert.strict(result, blogs);
-  // });
+    const expectedResult = blogs.map((blog) => {
+      blog["id"] = blog._id;
+
+      return _.pick(blog, ["title", "author", "url", "likes", "id"]);
+    });
+
+    assert.deepStrictEqual(
+      _.sortBy(result.body, ["id"]),
+      _.sortBy(expectedResult, ["id"])
+    );
+  });
+
+  test.only("HTTP POST request to the /api/blogs URL successfully creates a new blog post", async () => {
+    const result = await api
+      .post("/api/blogs")
+      .send({
+        title: "As it was, they said, it was not the same.",
+        author: "Tyga Milauew",
+        url: "http://bundlewarriors.com",
+        likes: 23,
+      })
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const updatedBlog = await api.get("/api/blogs");
+    console.log({ UPDTED: updatedBlog.body.length });
+
+    assert(result.body.message === "Created listing successful");
+    assert(updatedBlog.body.length > blogs.length);
+  });
 });
 
 test("dummy returns one", () => {
