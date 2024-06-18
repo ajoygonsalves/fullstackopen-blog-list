@@ -184,6 +184,20 @@ describe.only("REST API tests", () => {
     assert(result.body.blog.likes === 0);
     // assert(updatedBlog.body.length > blogs.length);
   });
+
+  test.only("If the likes property is missing from the request, it will default to the value 0", async () => {
+    const result = await api
+      .post("/api/blogs")
+      .send({
+        author: "Tyga Milauew",
+        url: "http://bundlewarriors.com",
+      })
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    assert(result.status === 400);
+    // assert(updatedBlog.body.length > blogs.length);
+  });
 });
 
 test("dummy returns one", () => {
