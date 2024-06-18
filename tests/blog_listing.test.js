@@ -198,6 +198,42 @@ describe.only("REST API tests", () => {
     assert(result.status === 400);
     // assert(updatedBlog.body.length > blogs.length);
   });
+
+  test.only("Updating the number of likes for a blog post", async () => {
+    const blogsAtStart = await Blog.find({});
+    const blogToUpdate = blogsAtStart[0];
+
+    const updatedLikes = { likes: blogToUpdate.likes + 1 };
+
+    const result = await api
+      .put(`/api/blogs/${blogToUpdate._id}`)
+      .send(updatedLikes)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    assert.strictEqual(result.body.updatedBlog.likes, blogToUpdate.likes + 1);
+
+    const blogsAtEnd = await Blog.find({});
+    const updatedBlog = blogsAtEnd.find(
+      (blog) => blog._id.toString() === blogToUpdate._id.toString()
+    );
+    assert.strictEqual(updatedBlog.likes, blogToUpdate.likes + 1);
+  });
+
+  test.only("Deleting a blog post", async () => {
+    const blogsAtStart = await Blog.find({});
+    const blogToDelete = blogsAtStart[0];
+
+    await api.delete(`/api/blogs/${blogToDelete._id}`).expect(200);
+
+    const blogsAtEnd = await Blog.find({});
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
+
+    const deletedBlog = blogsAtEnd.find(
+      (blog) => blog._id.toString() === blogToDelete._id.toString()
+    );
+    assert.strictEqual(deletedBlog, undefined);
+  });
 });
 
 test("dummy returns one", () => {

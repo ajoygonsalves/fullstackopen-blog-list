@@ -1,14 +1,10 @@
 const Blog = require("../models/blog");
 const logger = require("../utils/logger");
+require("express-async-errors");
 
 const getAll = async (req, res) => {
-  try {
-    const all = await Blog.find({});
-    res.status(200).json(all);
-  } catch (error) {
-    logger.error("Error fetching blogs: ", error);
-    res.status(500).json({ error: "Failed to fetch blogs" });
-  }
+  const all = await Blog.find({});
+  res.status(200).json(all);
 };
 
 const createBlogListing = async (req, res) => {
@@ -22,19 +18,54 @@ const createBlogListing = async (req, res) => {
 
   const blog = new Blog({ title, author, url, likes: likes || 0 });
 
-  try {
-    await blog.save();
+  await blog.save();
 
-    res
-      .status(201)
-      .location(`${req.baseUrl}/` + blog.id)
-      .json({ message: "Created listing successful", blog });
+  res
+    .status(201)
+    .location(`${req.baseUrl}/` + blog.id)
+    .json({ message: "Created listing successful", blog });
 
-    logger.info({ message: "Created listing successful", blog });
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: "Failed to create blog listing" });
-  }
+  logger.info({ message: "Created listing successful", blog });
 };
 
-module.exports = { getAll, createBlogListing };
+const deleteBlogListing = async (req, res) => {
+  const { id } = req.params;
+
+  const blogToBeDeleted = await Blog.findByIdAndDelete(id);
+
+  if (!blogToBeDeleted) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+
+  res.status(200).json({ message: "Blog deleted successfully" });
+  logger.info({ message: "Blog deleted successfully", id });
+};
+
+const updateBlogListing = async (req, res) => {
+  const { id } = req.params;
+  const { likes } = req.body;
+
+  if (likes === undefined) {
+    return res.status(400).json({ error: "Likes are required" });
+  }
+
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    id,
+    { likes },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedBlog) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+
+  res.status(200).json({ message: "Blog updated successfully", updatedBlog });
+  logger.info({ message: "Blog updated successfully", updatedBlog });
+};
+
+module.exports = {
+  getAll,
+  createBlogListing,
+  updateBlogListing,
+  deleteBlogListing,
+};
