@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const User = require("../models/user");
 
 const dummy = (blogs) => {
   return 1;
@@ -97,12 +98,18 @@ const mostLiked = (blogs) => {
   return mostLikedItem;
 };
 
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map((u) => u.toJSON());
+};
+
 module.exports = {
   dummy,
   totalLikes,
   mostLiked,
   mostBlogs,
   mostLikes,
+  usersInDb,
 };
 
 // Define a new totalLikes function that receives a list of blog posts as a parameter. The function returns the total sum of likes in all of the blog posts.

@@ -14,6 +14,8 @@ const supertest = require("supertest");
 const mongoose = require("mongoose");
 const Blog = require("../models/blog");
 const _ = require("lodash");
+const bcrypt = require("bcrypt");
+const User = require("../models/user");
 
 const api = supertest(app);
 
@@ -113,8 +115,8 @@ afterEach(async () => {
   }
 });
 
-describe.only("REST API tests", () => {
-  test.only("Blogs use id instead of _id", async () => {
+describe("REST API tests", () => {
+  test("Blogs use id instead of _id", async () => {
     const result = await api
       .get("/api/blogs")
       .expect(200)
@@ -134,7 +136,7 @@ describe.only("REST API tests", () => {
     );
   });
 
-  test.only("Blogs are returned as json", async () => {
+  test("Blogs are returned as json", async () => {
     const result = await api
       .get("/api/blogs")
       .expect(200)
@@ -152,7 +154,7 @@ describe.only("REST API tests", () => {
     );
   });
 
-  test.only("HTTP POST request to the /api/blogs URL successfully creates a new blog post", async () => {
+  test("HTTP POST request to the /api/blogs URL successfully creates a new blog post", async () => {
     const result = await api
       .post("/api/blogs")
       .send({
@@ -170,7 +172,7 @@ describe.only("REST API tests", () => {
     assert(updatedBlog.body.length > blogs.length);
   });
 
-  test.only("If the likes property is missing from the request, it will default to the value 0", async () => {
+  test("If the likes property is missing from the request, it will default to the value 0", async () => {
     const result = await api
       .post("/api/blogs")
       .send({
@@ -185,7 +187,7 @@ describe.only("REST API tests", () => {
     // assert(updatedBlog.body.length > blogs.length);
   });
 
-  test.only("If the likes property is missing from the request, it will default to the value 0", async () => {
+  test("If the likes property is missing from the request, it will default to the value 0", async () => {
     const result = await api
       .post("/api/blogs")
       .send({
@@ -199,7 +201,7 @@ describe.only("REST API tests", () => {
     // assert(updatedBlog.body.length > blogs.length);
   });
 
-  test.only("Updating the number of likes for a blog post", async () => {
+  test("Updating the number of likes for a blog post", async () => {
     const blogsAtStart = await Blog.find({});
     const blogToUpdate = blogsAtStart[0];
 
@@ -220,7 +222,7 @@ describe.only("REST API tests", () => {
     assert.strictEqual(updatedBlog.likes, blogToUpdate.likes + 1);
   });
 
-  test.only("Deleting a blog post", async () => {
+  test("Deleting a blog post", async () => {
     const blogsAtStart = await Blog.find({});
     const blogToDelete = blogsAtStart[0];
 
@@ -717,5 +719,59 @@ describe("Author with most likes", () => {
     const result = listHelper.mostLikes(blogs);
 
     assert.deepStrictEqual(result, { author: "Edsger W. Dijkstra", likes: 12 });
+  });
+});
+
+describe("when there is initially one user in db", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash("sekret", 10);
+    const user = new User({ username: "root", passwordHash });
+
+    await user.save();
+  });
+
+  test("creation succeeds with a fresh username", async () => {
+    const usersAtStart = await listHelper.usersInDb();
+
+    const newUser = {
+      username: "mluukkai",
+      name: "Matti Luukkainen",
+      password: "salainen",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await listHelper.usersInDb();
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map((u) => u.username);
+    assert(usernames.includes(newUser.username));
+  });
+
+  test("creation fails with proper statuscode and message if username already taken", async () => {
+    const usersAtStart = await listHelper.usersInDb();
+
+    const newUser = {
+      username: "root",
+      name: "Superuser",
+      password: "salainen",
+    };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await listHelper.usersInDb();
+    assert(result.body.error.includes("expected `username` to be unique"));
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
   });
 });

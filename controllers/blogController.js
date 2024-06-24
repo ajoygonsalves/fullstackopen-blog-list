@@ -4,6 +4,7 @@ require("express-async-errors");
 
 const getAll = async (req, res) => {
   const all = await Blog.find({});
+
   res.status(200).json(all);
 };
 
