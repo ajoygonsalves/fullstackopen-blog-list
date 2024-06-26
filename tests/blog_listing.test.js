@@ -775,3 +775,33 @@ describe("when there is initially one user in db", () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length);
   });
 });
+
+describe.only("sign up process", () => {
+  test.only("username with less than 3 characters is rejected and appropriate status sent back", async () => {
+    const newUser = {
+      username: "hg",
+      name: "namedperson",
+      password: "122332",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+  });
+
+  test.only("password with less than 3 characters is rejected and appropriate status sent back", async () => {
+    const newUser = {
+      username: "guided",
+      name: "namedperson",
+      password: "12",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+  });
+});
