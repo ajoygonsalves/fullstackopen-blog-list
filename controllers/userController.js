@@ -2,7 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
 const createUser = async (req, res) => {
-  const { username, name, password } = req.body;
+  const { username, name, password, blog } = req.body;
 
   if (username.length < 3) {
     return res.status(400).json({
@@ -26,6 +26,7 @@ const createUser = async (req, res) => {
     username,
     name,
     passwordHash,
+    blog: blog || [],
   });
 
   const savedUser = await user.save();
@@ -34,7 +35,7 @@ const createUser = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-  const allUsers = await User.find({});
+  const allUsers = await User.find({}).populate("blogs");
   res.status(200).json({ allUsers });
 };
 
