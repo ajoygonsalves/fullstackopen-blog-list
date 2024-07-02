@@ -2,6 +2,16 @@ const Blog = require("../models/blog");
 const User = require("../models/user");
 const logger = require("../utils/logger");
 require("express-async-errors");
+const jwt = require("jsonwebtoken");
+const config = require("../utils/config");
+
+const getTokenFrom = (req) => {
+  const authorization = req.get("authorization");
+  if (authorization && authorization.startsWith("Bearer ")) {
+    return authorization.replace("Bearer ", "");
+  }
+  return null;
+};
 
 const getAll = async (req, res) => {
   const all = await Blog.find({}).populate("user");
@@ -12,13 +22,17 @@ const getAll = async (req, res) => {
 const createBlogListing = async (req, res) => {
   const { title, author, url, likes } = req.body;
 
+  const decodedToken = jwt.verify(getTokenFrom(req), config.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: "token invalid" });
+  }
+  const user = await User.findById(decodedToken.id);
+
   if (!title || !author || !url) {
     return res
       .status(400)
       .json({ error: "Title, author, and URL are required" });
   }
-
-  const user = await User.findOne({});
 
   const blog = new Blog({ title, author, url, likes: likes || 0, user });
   await blog.save();
