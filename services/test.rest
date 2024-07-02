@@ -48,7 +48,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg0NmVlN2JiZGNlODZiOWRiMzA2OTIiLCJpYXQiOjE3MTk5NTY4ODN9.-GCyf1cj6xS5BHTHr1GltP9bQr7qbrhri3NzkSdrX9w
 
 {
-  "title": "JWT Blog", 
-  "author": "Linell Nazarene",
-  "url": "www.copacabana.com"
+  "title": "Finishing off exercise 4.20", 
+  "author": "Fulus Stackhus",
+  "url": "www.FSTH.com"
 }
