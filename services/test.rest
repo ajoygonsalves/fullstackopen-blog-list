@@ -1,9 +1,10 @@
-GET http://localhost:3000/api/blogs
+GET http://localhost:3111/api/blogs
 
 ###
 
-POST http://localhost:3000/api/blogs HTTP/1.1
+POST http://localhost:3111/api/blogs HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg1ZDI5MzE4MjQwMDc3ZDc4ZTM3YjMiLCJpYXQiOjE3MjAwNDYyMzR9.aLddOSYiobNgFw9IvMj8rG1Lp2k5B1ENvIpJ575JsXY
 
 {
    "title": "Posting is fun, with mongoose!",
@@ -45,10 +46,16 @@ Content-Type: application/json
 
 POST http://localhost:3111/api/blogs HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg0NmVlN2JiZGNlODZiOWRiMzA2OTIiLCJpYXQiOjE3MTk5NTY4ODN9.-GCyf1cj6xS5BHTHr1GltP9bQr7qbrhri3NzkSdrX9w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg1ZDI5MzE4MjQwMDc3ZDc4ZTM3YjMiLCJpYXQiOjE3MjAwNDYyMzR9.aLddOSYiobNgFw9IvMj8rG1Lp2k5B1ENvIpJ575JsXY
 
 {
-  "title": "Finishing off exercise 4.20", 
-  "author": "Fulus Stackhus",
-  "url": "www.FSTH.com"
+  "title": "Tiddle taddle picked a ball", 
+  "author": "Happy Lotter",
+  "url": "www.thisissite.com"
 }
+
+###
+
+DELETE http://localhost:3111/api/blogs/6685d3ce7090529bb7dffb24 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg1ZDI5MzE4MjQwMDc3ZDc4ZTM3YjMiLCJpYXQiOjE3MjAwNDYyMzR9.aLddOSYiobNgFw9IvMj8rG1Lp2k5B1ENvIpJ575JsXY

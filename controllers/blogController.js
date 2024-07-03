@@ -5,6 +5,7 @@ require("express-async-errors");
 const jwt = require("jsonwebtoken");
 const config = require("../utils/config");
 const middleware = require("../utils/middleware");
+const { default: mongoose } = require("mongoose");
 
 const getAll = async (req, res) => {
   const all = await Blog.find({}).populate("user");
@@ -51,11 +52,36 @@ const createBlogListing = async (req, res) => {
 const deleteBlogListing = async (req, res) => {
   const { id } = req.params;
 
-  const blogToBeDeleted = await Blog.findByIdAndDelete(id);
+  const decodedToken = jwt.verify(
+    middleware.tokenExtractor(req),
+    config.SECRET
+  );
+  if (!decodedToken.id) {
+    return res.status(401).json({ error: "token invalid" });
+  }
+
+  const user = await User.findById(decodedToken.id);
+
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized request" });
+  }
+
+  const blogToBeDeleted = await Blog.findById(id);
 
   if (!blogToBeDeleted) {
     return res.status(404).json({ error: "Blog not found" });
   }
+
+  console.log({ blogToBeDeleted: blogToBeDeleted.user.toString() });
+
+  if (blogToBeDeleted.user.toString() !== user._id.toString()) {
+    return res.status(401).json({ error: "Unauthorized request" });
+  }
+
+  await Blog.findByIdAndDelete(id);
+
+  user.blogs = user.blogs.filter((blogId) => blogId.toString() !== id);
+  await user.save();
 
   res.status(200).json({ message: "Blog deleted successfully" });
   logger.info({ message: "Blog deleted successfully", id });
