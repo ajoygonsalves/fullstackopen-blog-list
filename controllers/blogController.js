@@ -16,21 +16,13 @@ const getAll = async (req, res) => {
 const createBlogListing = async (req, res) => {
   const { title, author, url, likes } = req.body;
 
-  const decodedToken = jwt.verify(
-    middleware.tokenExtractor(req),
-    config.SECRET
-  );
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "token invalid" });
-  }
-  const user = await User.findById(decodedToken.id);
-
   if (!title || !author || !url) {
     return res
       .status(400)
       .json({ error: "Title, author, and URL are required" });
   }
 
+  const user = req.user;
   const blog = new Blog({ title, author, url, likes: likes || 0, user });
   await blog.save();
 
@@ -52,20 +44,7 @@ const createBlogListing = async (req, res) => {
 const deleteBlogListing = async (req, res) => {
   const { id } = req.params;
 
-  const decodedToken = jwt.verify(
-    middleware.tokenExtractor(req),
-    config.SECRET
-  );
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: "token invalid" });
-  }
-
-  const user = await User.findById(decodedToken.id);
-
-  if (!user) {
-    return res.status(401).json({ error: "Unauthorized request" });
-  }
-
+  const user = req.user;
   const blogToBeDeleted = await Blog.findById(id);
 
   if (!blogToBeDeleted) {
