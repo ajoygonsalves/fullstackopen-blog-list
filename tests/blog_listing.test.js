@@ -119,6 +119,10 @@ describe("REST API tests", () => {
   test("Blogs use id instead of _id", async () => {
     const result = await api
       .get("/api/blogs")
+      .set(
+        "Authorization",
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZ1bnVzZXJuYW1lIiwiaWQiOiI2Njg1ZDI5MzE4MjQwMDc3ZDc4ZTM3YjMiLCJpYXQiOjE3MjAwNDYyMzR9.aLddOSYiobNgFw9IvMj8rG1Lp2k5B1ENvIpJ575JsXY"
+      )
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
