@@ -4,6 +4,14 @@ const bcrypt = require("bcrypt");
 const createUser = async (req, res) => {
   const { username, name, password, blog } = req.body;
 
+  const checkUser = await User.findOne({ username });
+  if (checkUser) {
+    res.status(409).json({
+      message:
+        "User already exists, please use different username or login instead",
+    });
+  }
+
   if (username.length < 3) {
     return res.status(400).json({
       status: 400,
