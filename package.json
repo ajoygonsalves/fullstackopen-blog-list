@@ -6,7 +6,8 @@
   "scripts": {
     "start": "cross-env node index.js",
     "dev": "cross-env nodemon index.js",
-    "test": "cross-env node --test"
+    "test": "cross-env node --test",
+    "start:test": "cross-env NODE_ENV=test nodemon index.js"
   },
   "keywords": [],
   "author": "",
