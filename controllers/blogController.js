@@ -99,10 +99,65 @@ const updateBlogListing = async (req, res) => {
   logger.info({ message: "Blog updated successfully", updatedBlog });
 };
 
+const getBlogById = async (req, res) => {
+  const { id } = req.params;
+
+  const blog = await Blog.findById(id).populate("user", "username name");
+
+  if (!blog) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+
+  res.status(200).json(blog);
+};
+
+const addComment = async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  console.log(req.body);
+  console.log(id);
+
+  console.log(content);
+
+  if (!content) {
+    return res.status(400).json({ error: "Comment content is required" });
+  }
+
+  const blog = await Blog.findById(id);
+
+  console.log(blog);
+
+  if (!blog) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+
+  blog.comments.push({ content });
+  const updatedBlog = await blog.save();
+
+  res.status(201).json({ message: "Comment added successfully", updatedBlog });
+  logger.info({ message: "Comment added successfully", blogId: id, content });
+};
+
+const getComments = async (req, res) => {
+  const { id } = req.params;
+
+  const blog = await Blog.findById(id);
+
+  if (!blog) {
+    return res.status(404).json({ error: "Blog not found" });
+  }
+
+  res.status(200).json(blog.comments);
+};
+
 module.exports = {
   getAll,
   createBlogListing,
   updateBlogListing,
   deleteBlogListing,
   deleteAllBlogListing,
+  getBlogById,
+  addComment,
+  getComments,
 };
